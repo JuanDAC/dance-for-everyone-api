@@ -37,6 +37,7 @@ export class MediaController {
       const stream = await this.userService.getVideo(videoId, video);
       stream.pipe(res);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   };

@@ -1,6 +1,6 @@
 import { HttpException } from '@exceptions/HttpException';
 import { searchApiYoutube, SearchItem, SearchItems } from '@/interfaces/media.interface';
-import { YOUTUBE_KEY } from '@/config';
+import { YOUTUBE_API_KEY } from '@/config';
 import { YoutubeDataAPI } from 'youtube-v3-api';
 import ytdl, { videoFormat } from 'ytdl-core';
 import { Readable } from 'stream';
@@ -14,7 +14,7 @@ declare class MediaServiceMethod {
 
 export class MediaService extends YoutubeDataAPI implements MediaServiceMethod {
   constructor() {
-    super(YOUTUBE_KEY);
+    super(YOUTUBE_API_KEY);
   }
 
   getVideoUrl(videoId) {
@@ -69,17 +69,21 @@ export class MediaService extends YoutubeDataAPI implements MediaServiceMethod {
   }
 
   public async getVideo(videoId, format, range?) {
-    const url = this.getVideoUrl(videoId);
+    try {
+      const url = this.getVideoUrl(videoId);
 
-    const videoStream = ytdl(url, {
-      filter: formatFilter => Object.entries(format).every(([key, value]) => formatFilter[key] === value),
-      range,
-      dlChunkSize: 256 * 1024,
-    });
+      const videoStream = ytdl(url, {
+        filter: formatFilter => Object.entries(format).every(([key, value]) => formatFilter[key] === value),
+        range,
+        dlChunkSize: 256 * 1024,
+      });
 
-    if (!videoStream) throw new HttpException(409, "Video doesn't exist");
+      if (!videoStream) throw new HttpException(409, "Video doesn't exist");
 
-    return videoStream;
+      return videoStream;
+    } catch (e) {
+      throw Error(e);
+    }
   }
 
   /*   public async createUser(userData: CreateUserDto): Promise<User> {
